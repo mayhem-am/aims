@@ -1,0 +1,4 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Hi my name is {{ current_user.username }} and my id is {{session['_user_id']}} and I have a role of {{session['account_type']}}</h1>    
+{% endblock content %}
