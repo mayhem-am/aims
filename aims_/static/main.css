@@ -1,3 +1,5 @@
+/* use ctrl+shift+r <hard reload> to display css changes */
+
 body {
   background: #fafafa;
   color: #333333;
@@ -25,6 +27,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .content-section {
+  display: block;
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
@@ -77,4 +80,18 @@ a.article-title:hover {
 
 .account-heading {
   font-size: 2.5rem;
+}
+
+.sample-sizing-img {
+  height: 300px;
+  width: 450px;
+  margin-right: 16px;
+  margin-bottom: 16px;
+}
+
+.account-body-size{
+  height: 300px;
+  width: 500px;
+  margin-right: 1px;
+  margin-bottom: 16px;
 }

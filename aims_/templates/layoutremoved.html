@@ -1,0 +1,10 @@
+{% if session['account_type']=='broker' %}
+                <a class="nav-item nav-link" href="{{ url_for('account') }}">Account Hey Broker {{session['_user_id']}}</a>
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+              {% elif session['account_type']=='admin'%}
+                  <a class="nav-item nav-link" href="{{ url_for('account') }}">Account Hey Admin {{session['_user_id']}}</a>
+                  <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+              {% elif session['account_type']=='company'%}
+                  <a class="nav-item nav-link" href="{{ url_for('account') }}">Account Hey Company {{session['_user_id']}}</a>
+                  <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+              {% endif %} 

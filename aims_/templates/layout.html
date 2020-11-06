@@ -32,12 +32,8 @@
           <!-- Navbar Left Side -->
           <div class="navbar-nav mr-auto">
             {% if current_user.is_authenticated %}
-            {% if session['account_type']=='tester' %}
-            <a class="nav-item nav-link" href="#">Start Testing</a>
-            {% else %}
-            <a class="nav-item nav-link" href="#">Start Working on Project</a>
-            {% endif %}
-            {% else %}
+              <!-- Navbar user specific experimentation -->
+              <a class="nav-item nav-link" href="{{ url_for('fellowdisp') }}">Check out other {{session['account_type']}}s</a>              
             {% endif %}
             <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
             <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
@@ -45,14 +41,10 @@
           <!-- Navbar Right Side -->
           <div class="navbar-nav">
             {% if current_user.is_authenticated %}
-              {% if session['account_type']=='tester' %}
-                <a class="nav-item nav-link" href="#">Welcome Back Tester</a>
-                <a class="nav-item nav-link" href="{{ url_for('account') }}">Account Hey Tester {{session['_user_id']}}</a>
-                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
-              {% else %}
-                  <a class="nav-item nav-link" href="{{ url_for('account') }}">Account Hey User {{session['_user_id']}}</a>
-                  <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
-              {% endif %}
+            <a class="nav-item nav-link" href="{{ url_for('account',user_id = current_user.id) }}">Me : {{session['account_type']}}{{session['_user_id']}}</a>
+            <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+            
+            <!-- removed part in layoutremoved.html because of adding user.id to account's url -->
 
             {% else %}
               <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>

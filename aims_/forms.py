@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from aims_.models import User, Tester
+from aims_.models import Broker, Admin,Company
 
 
 class RegistrationForm(FlaskForm):
@@ -19,35 +19,46 @@ class RegistrationForm(FlaskForm):
 
     def validate_username(self, username):
         role = self.role.data.lower()
-        if role == 'user':
-            user = User.query.filter_by(username=username.data).first()
+        if role == 'broker':
+            user = Broker.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError('That username as User role is taken. Please choose a different one.')
-        elif role == 'tester':
-            user = Tester.query.filter_by(username=username.data).first()
+        elif role == 'admin':
+            user = Admin.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError('That username as Tester role is taken. Please choose a different one.')
+        elif role == 'company':
+            user = Company.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('That username as Tester role is taken. Please choose a different one.')
+        else:
+            raise ValidationError('Invalid role entered.')
 
     def validate_email(self, email):
         role = self.role.data.lower()
-        if role == 'user':
-            user = User.query.filter_by(email=email.data).first()
+        if role == 'broker':
+            user = Broker.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email as User role is taken. Please choose a different one.')
-        elif role == 'tester':
-            user = Tester.query.filter_by(email=email.data).first()
+        elif role == 'admin':
+            user = Admin.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email as Tester role is taken. Please choose a different one.')
+        elif role == 'company':
+            user = Company.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('That email as Tester role is taken. Please choose a different one.')
+        else:
+            raise ValidationError('Invalid role entered.')
     
     def validate_role(self, role):
         role = role.data.lower()
-        if role not in ["user","tester"]:
-            raise ValidationError('Your role is undefined. Please choose one from User or Tester.')
+        if role not in ["admin","broker","company"]:
+            raise ValidationError('Your role is undefined. Please choose one from Broker, Admin or Company.')
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    email = StringField('Email',validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     role = StringField('Role',validators=[DataRequired()])
@@ -55,6 +66,5 @@ class LoginForm(FlaskForm):
 
     def validate_role(self, role):
         role = role.data.lower()
-        #print(role)
-        if role not in ["user","tester"]:
-            raise ValidationError('Your role is undefined. Please choose one from User or Tester.')
+        if role not in ["admin","broker","company"]:
+            raise ValidationError('Your role is undefined. Please choose one from  Broker, Admin or Company.')
