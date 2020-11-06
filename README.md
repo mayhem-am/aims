@@ -1,3 +1,3 @@
 # AIMS
 
-*In production still*
+*Automated Invoice Management System*
