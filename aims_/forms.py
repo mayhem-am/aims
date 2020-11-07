@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aims_.models import Broker, Admin,Company
+from flask_wtf.file import FileField, FileAllowed
+from flask_login import current_user
 
 
 class RegistrationForm(FlaskForm):
@@ -55,3 +57,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     role = SelectField('Role',choices = ['Broker','Admin','Company'])
     submit = SubmitField('Login')
+
+# added form for company to upload invoice and coordinates file
+class UploadInvoiceForm(FlaskForm):
+    invoice_picture = FileField('Upload Invoice', validators=[FileAllowed(['jpg', 'png'])])
+    coords_file = FileField('Upload Coordinates File', validators=[FileAllowed(['csv'])])
+    submit = SubmitField('Upload')

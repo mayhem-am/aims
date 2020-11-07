@@ -1,9 +1,9 @@
-# import os
-# import secrets
-# from PIL import Image
+import os
+import secrets
+#from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, session
 from aims_ import app, db, bcrypt
-from aims_.forms import RegistrationForm, LoginForm
+from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm
 from aims_.models import Broker, Admin, Company
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -136,19 +136,49 @@ def view_companies(): #separate -- query
     else:
         abort(403)
 
-@app.route("/uploadinvoice")
+
+# helper function to save pictue in static/profile_pics
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    # file_name and file_extension is returned
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    form_picture.save(picture_path)
+    """
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+    """
+
+    return picture_fn
+
+@app.route("/uploadinvoice", methods=['GET','POST'])
 @login_required
 def upload_invoice(): #separate -- button #IMP
+    """
+    creating a form
+    """
     if session['account_type']== 'company':
-        return render_template('upload_invoice.html', title='Process',userdetail = current_user)
+        form = UploadInvoiceForm()
+        if form.validate_on_submit():
+            if form.invoice_picture.data or form.coords_file.data:
+                picture_file = save_picture(form.invoice_picture.data)
+
+        return render_template('upload_invoice.html', title='Process',userdetail = current_user, form=form)
     else:
         abort(403)
 
 @app.route("/viewinvoices")
 @login_required
 def view_invoices(): #separate -- query
+    # write the database query to get all invoices and then send
+    # here sending only profile picture
+    image_file = url_for('static', filename='profile_pics/')
     if session['account_type']== 'company':
-        return render_template('view_invoices.html', title='Process',userdetail = current_user)
+        return render_template('view_invoices.html', title='Process',userdetail = current_user, image_file=image_file)
     else:
         abort(403)
 
