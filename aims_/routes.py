@@ -164,8 +164,9 @@ def upload_invoice(): #separate -- button #IMP
     if session['account_type']== 'company':
         form = UploadInvoiceForm()
         if form.validate_on_submit():
-            if form.invoice_picture.data or form.coords_file.data:
+            if form.invoice_picture.data and form.coords_file.data:
                 picture_file = save_picture(form.invoice_picture.data)
+                coords_file = save_picture(form.coords_file.data)
 
         return render_template('upload_invoice.html', title='Process',userdetail = current_user, form=form)
     else:
