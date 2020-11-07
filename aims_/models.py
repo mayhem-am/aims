@@ -45,4 +45,26 @@ class Company(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
-        return f"Company('{self.username}', '{self.email}', '{self.image_file}')"
+        return f"Company('{self.username}', '{self.email}', '{self.image_file}')" 
+
+'''
+PRODUCT -->
+
+invoice id - fk
+company id - fk
+amount
+name
+id
+quantity
+'''
+
+
+'''
+INVOICE -->
+
+broker id - fk
+company id - fk
+image_file 
+coordinate file
+id
+'''

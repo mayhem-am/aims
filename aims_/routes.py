@@ -7,7 +7,6 @@ from aims_.forms import RegistrationForm, LoginForm
 from aims_.models import Broker, Admin, Company
 from flask_login import login_user, current_user, logout_user, login_required
 
-
 @app.route("/")
 @app.route("/home")
 @login_required
@@ -115,7 +114,7 @@ user specific routing
 '''
 @app.route("/processinvoices")
 @login_required
-def process_invoices():
+def process_invoices():  #separate -- button
     if session['account_type']== 'broker':
         return render_template('process_invoices.html', title='Process',userdetail = current_user)
     else:
@@ -123,7 +122,7 @@ def process_invoices():
 
 @app.route("/assignbrokers")
 @login_required
-def assign_brokers():
+def assign_brokers():  #separate -- button
     if session['account_type']== 'admin':
         return render_template('assign_brokers.html', title='Process',userdetail = current_user)
     else:
@@ -131,7 +130,7 @@ def assign_brokers():
 
 @app.route("/viewcompanies")
 @login_required
-def view_companies():
+def view_companies(): #separate -- query
     if session['account_type']== 'admin':
         return render_template('view_companies.html', title='Process',userdetail = current_user)
     else:
@@ -139,7 +138,7 @@ def view_companies():
 
 @app.route("/uploadinvoice")
 @login_required
-def upload_invoice():
+def upload_invoice(): #separate -- button #IMP
     if session['account_type']== 'company':
         return render_template('upload_invoice.html', title='Process',userdetail = current_user)
     else:
@@ -147,7 +146,7 @@ def upload_invoice():
 
 @app.route("/viewinvoices")
 @login_required
-def view_invoices():
+def view_invoices(): #separate -- query
     if session['account_type']== 'company':
         return render_template('view_invoices.html', title='Process',userdetail = current_user)
     else:
@@ -155,7 +154,7 @@ def view_invoices():
 
 @app.route("/viewinventory")
 @login_required
-def view_inventory():
+def view_inventory(): #separate -- query
     if session['account_type']== 'company':
         return render_template('view_inventory.html', title='Process',userdetail = current_user)
     else:
