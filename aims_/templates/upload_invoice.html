@@ -1,12 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
 		<h2>Upload Invoice</h2>
+<<<<<<< HEAD
+=======
+        <h2>Logged In as : {{session['account_type']}}</h2>
+        <h2>User name : {{ current_user.username }}</h2>
+>>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
         <div class="content-section">
         	<form method="POST" action="" enctype="multipart/form-data">
         		{{ form.hidden_tag() }}
         		<fieldset class="form-group">
         			<legend class="border-bottom mb-4">
+<<<<<<< HEAD
         				Upload Data
+=======
+        				Upload Data..
+>>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
         			</legend>
         			<div class="form-group">
         				{{ form.invoice_picture.label() }}
