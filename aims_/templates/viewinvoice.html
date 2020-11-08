@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            <img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
+            <div class="media-body">
+                <h3>{{ invoice.id }}</h3>
+                <p class="text-secondary">Company : {{ invoice.owner_id }}</p>
+            </div>
+        </div>
+{% endblock content %}

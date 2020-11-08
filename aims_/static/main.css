@@ -78,6 +78,11 @@ a.article-title:hover {
   margin-bottom: 16px;
 }
 
+.view-invoice{
+  height: 500px;
+  width: 300px;
+}
+
 .account-heading {
   font-size: 2.5rem;
 }

@@ -1,4 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
-        <h2>View invoices here {{session['account_type']}} {{current_user.username}}</h2>
+		<h2>Invoices by {{current_user.username}}</h2>
+		{% for invoice in image_files %}
+		<article class="media">
+			<div class="media-body">
+				<h2><a class="article-title" href="{{ url_for('view_invoice_by_id', invoice_id=invoice.id) }}">Invoice {{ invoice.id }}</a></h2>
+			</div>
+			<div class="media">
+				<img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
+			</div>
+		</article>
+		{% endfor %}
 {% endblock content %}

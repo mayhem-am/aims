@@ -47,6 +47,14 @@ class Company(db.Model, UserMixin):
     def __repr__(self):
         return f"Company('{self.username}', '{self.email}', '{self.image_file}')" 
 
+class Invoice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_file =  db.Column(db.String(20), nullable=False)
+    coors_file =  db.Column(db.String(20), nullable=False)
+    broker_id = db.Column(db.Integer, db.ForeignKey('broker.id'),nullable = True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+
+
 '''
 PRODUCT -->
 
@@ -56,15 +64,4 @@ amount
 name
 id
 quantity
-'''
-
-
-'''
-INVOICE -->
-
-broker id - fk
-company id - fk
-image_file 
-coordinate file
-id
 '''
