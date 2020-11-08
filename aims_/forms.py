@@ -61,9 +61,5 @@ class LoginForm(FlaskForm):
 # added form for company to upload invoice and coordinates file
 class UploadInvoiceForm(FlaskForm):
     invoice_picture = FileField('Upload Invoice', validators=[FileAllowed(['jpg', 'png'])])
-<<<<<<< HEAD
     coords_file = FileField('Upload Coordinates File', validators=[FileAllowed(['csv','xlsx'])])
-=======
-    coords_file = FileField('Upload Coordinates File', validators=[FileAllowed(['csv'])])
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     submit = SubmitField('Upload')

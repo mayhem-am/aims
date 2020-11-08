@@ -4,11 +4,7 @@ import secrets
 from flask import render_template, url_for, flash, redirect, request, abort, session
 from aims_ import app, db, bcrypt
 from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm
-<<<<<<< HEAD
 from aims_.models import Broker, Admin, Company, Invoice
-=======
-from aims_.models import Broker, Admin, Company
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
 from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route("/")
@@ -140,7 +136,6 @@ def view_companies(): #separate -- query
     else:
         abort(403)
 
-<<<<<<< HEAD
 def save_picture(form_picture,filetype):
     """
     helper function to save pictue in static/profile_pics
@@ -148,17 +143,6 @@ def save_picture(form_picture,filetype):
     f_name, f_ext = os.path.splitext(form_picture.filename) # file_name and file_extension is returned
     picture_fn = f_name + f_ext
     picture_path = os.path.join(app.root_path, 'static/'+filetype, picture_fn)
-=======
-
-# helper function to save pictue in static/profile_pics
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    # file_name and file_extension is returned
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
-
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     form_picture.save(picture_path)
     """
     output_size = (125, 125)
@@ -166,27 +150,15 @@ def save_picture(form_picture):
     i.thumbnail(output_size)
     i.save(picture_path)
     """
-<<<<<<< HEAD
-=======
-
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     return picture_fn
 
 @app.route("/uploadinvoice", methods=['GET','POST'])
 @login_required
-<<<<<<< HEAD
 def upload_invoice():
-=======
-def upload_invoice(): #separate -- button #IMP
-    """
-    creating a form
-    """
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     if session['account_type']== 'company':
         form = UploadInvoiceForm()
         if form.validate_on_submit():
             if form.invoice_picture.data and form.coords_file.data:
-<<<<<<< HEAD
                 picture_file = save_picture(form.invoice_picture.data,'invoices')
                 coords_file = save_picture(form.coords_file.data,'coordinates')
                 inv = Invoice(image_file = picture_file,coors_file = coords_file,owner_id = current_user.id)
@@ -194,18 +166,11 @@ def upload_invoice(): #separate -- button #IMP
                 db.session.commit()
                 flash('Your invoice has been uploaded. Go to View invoices to check', 'success')
         return render_template('upload_invoice.html', title='Upload',userdetail = current_user, form=form)
-=======
-                picture_file = save_picture(form.invoice_picture.data)
-                coords_file = save_picture(form.coords_file.data)
-
-        return render_template('upload_invoice.html', title='Process',userdetail = current_user, form=form)
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     else:
         abort(403)
 
 @app.route("/viewinvoices")
 @login_required
-<<<<<<< HEAD
 def view_invoices(): 
     if session['account_type']== 'company':
         invoices = Invoice.query.filter_by(owner_id = current_user.id)
@@ -219,14 +184,6 @@ def view_invoice_by_id(invoice_id):
     if session['account_type']== 'company':
         invoice = Invoice.query.get_or_404(invoice_id)
         return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
-=======
-def view_invoices(): #separate -- query
-    # write the database query to get all invoices and then send
-    # here sending only profile picture
-    image_file = url_for('static', filename='profile_pics/')
-    if session['account_type']== 'company':
-        return render_template('view_invoices.html', title='Process',userdetail = current_user, image_file=image_file)
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
     else:
         abort(403)
 

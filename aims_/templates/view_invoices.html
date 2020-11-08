@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-<<<<<<< HEAD
 		<h2>Invoices by {{current_user.username}}</h2>
 		{% for invoice in image_files %}
 		<article class="media">
@@ -12,15 +11,4 @@
 			</div>
 		</article>
 		{% endfor %}
-=======
-        <h2>View invoices here Usertype : {{session['account_type']}} </h2>
-        <h2>Username : {{current_user.username}}</h2>
-        <div class="content-section">
-        	<div class="media">
-        		{% for image in image_file %}
-        			<span><img class="" src="{{ image }}" width="150" height="150"></span></br>
-        		{% endfor %}
-        	</div>
-        </div>
->>>>>>> c3d1f23744bf2dbdb899c2f03801ca733742deac
 {% endblock content %}
