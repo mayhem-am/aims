@@ -5,7 +5,13 @@
             <img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
             <div class = "invoice-body">
                 <h4>Invoice {{ invoice.id }}</h4>
-                <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+                {% if session['account_type']=='company'%}
+                    <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+                {% elif session['account_type']=='admin' %}
+                    <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('assign_invoice', invoice_id=invoice.id) }}">Assign</a>
+                {% else %}
+                    <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('process_invoice', invoice_id=invoice.id) }}">Process</a>
+                {% endif %}
             </div>
         </div>
         <!-- Modal -->

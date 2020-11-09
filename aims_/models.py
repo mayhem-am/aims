@@ -23,6 +23,7 @@ class Broker(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
+    invoices = db.relationship('Invoice', backref='processor', lazy=True)
 
     def __repr__(self):
         return f"Broker('{self.username}', '{self.email}', '{self.image_file}')"
@@ -43,6 +44,7 @@ class Company(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
+    invoices = db.relationship('Invoice', backref='owner', lazy=True)
 
     def __repr__(self):
         return f"Company('{self.username}', '{self.email}', '{self.image_file}')" 
@@ -53,6 +55,9 @@ class Invoice(db.Model):
     coors_file =  db.Column(db.String(20), nullable=False)
     broker_id = db.Column(db.Integer, db.ForeignKey('broker.id'),nullable = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Invoice('{self.image_file}', Owner '{self.owner_id}',Assigned to '{self.broker_id}')" 
 
 
 '''

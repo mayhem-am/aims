@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-		<h2>Invoices by {{current_user.username}}</h2>
 		{% for invoice in image_files %}
 		<article class="media">
 			<div class="media-body">
@@ -10,5 +9,7 @@
 				<img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
 			</div>
 		</article>
+		<div class="col-md-9 mu-5 mb-5"></div>
 		{% endfor %}
+		
 {% endblock content %}

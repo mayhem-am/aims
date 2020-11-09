@@ -3,7 +3,7 @@ import secrets
 #from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, session
 from aims_ import app, db, bcrypt
-from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm
+from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm
 from aims_.models import Broker, Admin, Company, Invoice
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -23,6 +23,17 @@ def fellowdisp():
     elif session['account_type'] == 'company':
         users = Company.query.all()
     return render_template('fellowsdisp.html',users = users)
+
+@app.route("/account/<int:user_id>/view")
+@login_required
+def account(user_id):
+    if session['account_type'] == 'broker':
+        user = Broker.query.get_or_404(user_id)
+    elif session['account_type'] == 'admin':
+        user = Admin.query.get_or_404(user_id)
+    elif session['account_type'] == 'company':
+        user = Company.query.get_or_404(user_id)
+    return render_template('account.html', title='Account',userdetail = user)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -44,7 +55,6 @@ def register():
             return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
-
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -52,45 +62,26 @@ def login():
     form = LoginForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            #----------------- MODIFYING SESSION
+            # MODIFYING SESSION
             session['account_type'] = form.role.data.lower()
-            #------------------ ADDED SESSION DETAILS
+            # ADDED SESSION DETAILS
             if session['account_type'] == 'broker':
-                user = Broker.query.filter_by(email=form.email.data).first()
-                if user: 
-                    if bcrypt.check_password_hash(user.password, form.password.data):
-                        login_user(user)
-                        next_page = request.args.get('next')
-                        return redirect(next_page) if next_page else redirect(url_for('home'))
-                    else:
-                        flash(f'Welcome back {user.username}. Please check password', 'danger')
-                else:
-                    flash('Email does not exist. Register Below', 'danger')
+                typeofuser = Broker
             elif session['account_type'] == 'admin':
-                user = Admin.query.filter_by(email=form.email.data).first()
-                if user: 
-                    if bcrypt.check_password_hash(user.password, form.password.data):
-                        login_user(user)
-                        next_page = request.args.get('next')                        
-                        return redirect(next_page) if next_page else redirect(url_for('home'))
-                    else:
-                        flash(f'Welcome back {user.username}. Please check password', 'danger')
-                else:
-                    flash('Email does not exist. Register Below', 'danger')
+                typeofuser = Admin
             elif session['account_type'] == 'company':
-                user = Company.query.filter_by(email=form.email.data).first()
-                if user: 
-                    if bcrypt.check_password_hash(user.password, form.password.data):
-                        login_user(user)
-                        next_page = request.args.get('next')
-                        return redirect(next_page) if next_page else redirect(url_for('home'))
-                    else:
-                        flash(f'Welcome back {user.username}. Please check password', 'danger')
+                typeofuser = Company
+            user = typeofuser.query.filter_by(email=form.email.data).first()
+            if user: 
+                if bcrypt.check_password_hash(user.password, form.password.data):
+                    login_user(user)
+                    next_page = request.args.get('next')
+                    return redirect(next_page) if next_page else redirect(url_for('home'))
                 else:
-                    flash('Email does not exist. Register Below', 'danger')
-            
+                    flash(f'Welcome back {user.username}. Please check password', 'danger')
+            else:
+                flash('Email does not exist. Register Below', 'danger')            
     return render_template('login.html', title='Login', form=form)
-
 
 @app.route("/logout")
 def logout():
@@ -98,33 +89,57 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route("/account/<int:user_id>/view")
-@login_required
-def account(user_id):
-    if session['account_type'] == 'broker':
-        user = Broker.query.get_or_404(user_id)
-    elif session['account_type'] == 'admin':
-        user = Admin.query.get_or_404(user_id)
-    elif session['account_type'] == 'company':
-        user = Company.query.get_or_404(user_id)
-    return render_template('account.html', title='Account',userdetail = user)
-
 '''
-user specific routing
+broker specific routing
 '''
 @app.route("/processinvoices")
 @login_required
 def process_invoices():  #separate -- button
     if session['account_type']== 'broker':
-        return render_template('process_invoices.html', title='Process',userdetail = current_user)
+        invoices = Broker.query.filter_by(id = current_user.id).first().invoices
+        return render_template('view_invoices.html', title='Process Invoices',image_files=invoices)
     else:
         abort(403)
 
+@app.route("/viewinvoices/<int:invoice_id>/process", methods=['GET','POST'])
+@login_required
+def process_invoice(invoice_id): 
+    """
+    invoice extraction part
+    """
+    if session['account_type']== 'broker':
+        return render_template('process_invoice.html', title='Extract Invoice')
+    else:
+        abort(403)
+
+
+'''
+admin specific routing
+'''
+
 @app.route("/assignbrokers")
 @login_required
-def assign_brokers():  #separate -- button
+def assign_brokers():
     if session['account_type']== 'admin':
-        return render_template('assign_brokers.html', title='Assign',userdetail = current_user)
+        invoices = Invoice.query.filter_by(broker_id = None).all()
+        return render_template('view_invoices.html', title='View Invoices',image_files=invoices)
+    else:
+        abort(403)
+
+@app.route("/viewinvoices/<int:invoice_id>/assign", methods=['GET','POST'])
+@login_required
+def assign_invoice(invoice_id): 
+    if session['account_type']== 'admin':
+        form = SelectBrokerForm()
+        if request.method == 'POST':
+            invoice = Invoice.query.filter_by(id = invoice_id).first()
+            brokerid = Broker.query.filter_by(username = form.broker.data).first().id
+            invoice.broker_id = brokerid
+            db.session.commit()
+            print(invoice)
+            flash('Your invoice has been assigned to %s'%(form.broker.data), 'success')
+            return redirect(url_for('assign_brokers'))
+        return render_template('assign_broker.html', title='Assign Broker',form = form)
     else:
         abort(403)
 
@@ -135,6 +150,10 @@ def view_companies(): #separate -- query
         return render_template('view_companies.html', title='View Companies',userdetail = current_user)
     else:
         abort(403)
+
+'''
+company specific routing
+'''
 
 def save_picture(form_picture,filetype):
     """
@@ -173,7 +192,7 @@ def upload_invoice():
 @login_required
 def view_invoices(): 
     if session['account_type']== 'company':
-        invoices = Invoice.query.filter_by(owner_id = current_user.id)
+        invoices = Invoice.query.filter_by(owner_id = current_user.id).all()
         return render_template('view_invoices.html', title='View Invoices',userdetail = current_user, image_files=invoices)
     else:
         abort(403)
@@ -181,12 +200,8 @@ def view_invoices():
 @app.route("/viewinvoices/<int:invoice_id>/view")
 @login_required
 def view_invoice_by_id(invoice_id):
-    if session['account_type']== 'company':
-        invoice = Invoice.query.get_or_404(invoice_id)
-        print(invoice.broker_id) # --> None
-        return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
-    else:
-        abort(403)
+    invoice = Invoice.query.get_or_404(invoice_id)
+    return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
 
 @app.route("/viewinvoices/<int:invoice_id>/delete", methods=['POST'])
 @login_required
@@ -196,12 +211,17 @@ def delete_invoice(invoice_id):
         db.session.delete(invoice)
         db.session.commit()
         flash('Your invoice has been deleted!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('view_invoices'))
     else:
         abort(403)
+
 @app.route("/viewinventory")
 @login_required
 def view_inventory(): #separate -- query
+    """
+    query products belonging to company and id of invoice from where they came from
+    Product.query.filter_by(owner_id = currentuser.id).all()
+    """
     if session['account_type']== 'company':
         return render_template('view_inventory.html', title='View Inventory',userdetail = current_user)
     else:

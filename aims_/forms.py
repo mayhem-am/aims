@@ -63,3 +63,8 @@ class UploadInvoiceForm(FlaskForm):
     invoice_picture = FileField('Upload Invoice', validators=[FileAllowed(['jpg', 'png'])])
     coords_file = FileField('Upload Coordinates File', validators=[FileAllowed(['csv','xlsx'])])
     submit = SubmitField('Upload')
+
+class SelectBrokerForm(FlaskForm):
+    brokers = Broker.query.all()
+    broker = SelectField('Broker',choices = [broker.username for broker in brokers])
+    submit = SubmitField('Select')
