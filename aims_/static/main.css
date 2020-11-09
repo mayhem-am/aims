@@ -100,3 +100,8 @@ a.article-title:hover {
   margin-right: 1px;
   margin-bottom: 16px;
 }
+
+.invoice-body{
+  margin-left: 75px;
+  margin-bottom: 75px;
+}

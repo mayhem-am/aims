@@ -183,10 +183,22 @@ def view_invoices():
 def view_invoice_by_id(invoice_id):
     if session['account_type']== 'company':
         invoice = Invoice.query.get_or_404(invoice_id)
+        print(invoice.broker_id) # --> None
         return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
     else:
         abort(403)
 
+@app.route("/viewinvoices/<int:invoice_id>/delete", methods=['POST'])
+@login_required
+def delete_invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    if session['account_type']== 'company' and invoice.owner_id == current_user.id:
+        db.session.delete(invoice)
+        db.session.commit()
+        flash('Your invoice has been deleted!', 'success')
+        return redirect(url_for('home'))
+    else:
+        abort(403)
 @app.route("/viewinventory")
 @login_required
 def view_inventory(): #separate -- query
