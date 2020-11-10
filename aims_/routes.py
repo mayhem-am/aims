@@ -124,8 +124,7 @@ def process_invoice(invoice_id):
         db.session.commit()
         return redirect(url_for('view_invoices'))
         return render_template('process_invoice.html', title='Extract Invoice')
-    else:
-        abort(403)
+    abort(403)
 
 '''
 admin specific routing
@@ -144,22 +143,19 @@ def assign_invoice(invoice_id):
                 flash('Your invoice has been assigned to %s'%(form.broker.data), 'success')
                 return redirect(url_for('view_invoices'))
         return render_template('assign_broker.html', title='Assign Broker',form = form)
-    else:
-        abort(403)
+    abort(403)
 
 @app.route("/viewcompanies")
 @login_required
-def view_companies(): #separate -- query
+def view_companies():
     if session['account_type']== 'admin':
         companies = Company.query.all()
         return render_template('view_companies.html', title='View Companies',companies = companies)
-    else:
-        abort(403)
-
+    abort(403)
 
 @app.route("/viewcompanies/<int:company_id>/assigncommission",methods= ['GET','POST'])
 @login_required
-def view_company_by_id(company_id): #separate -- query
+def view_company_by_id(company_id):
     if session['account_type']== 'admin':
         company = Company.query.filter_by(id = company_id).first()
         form = AssignCommissionForm()
@@ -172,18 +168,16 @@ def view_company_by_id(company_id): #separate -- query
         elif request.method == 'GET':
             form.newcommission.data = company.commission
         return render_template('assign_commission.html', title='Assign Commission',form = form)
-    else:
-        abort(403)
+    abort(403)
 
 '''
 company specific routing
 '''
-
 def save_picture(form_picture,filetype):
     """
     helper function to save pictue in static/profile_pics
     """
-    f_name, f_ext = os.path.splitext(form_picture.filename) # file_name and file_extension is returned
+    f_name, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = f_name + f_ext
     picture_path = os.path.join(app.root_path, 'static/'+filetype, picture_fn)
     form_picture.save(picture_path)
@@ -209,10 +203,9 @@ def upload_invoice():
                 db.session.commit()
                 flash('Your invoice has been uploaded. Go to View invoices to check', 'success')
         return render_template('upload_invoice.html', title='Upload',userdetail = current_user, form=form)
-    else:
-        abort(403)
+    abort(403)
 
-@app.route("/viewinvoices/<int:invoice_id>/delete", methods=['POST'])
+@app.route("/viewinvoices/<int:invoice_id>/delete", methods=['GET','POST'])
 @login_required
 def delete_invoice(invoice_id):
     if session['account_type']== 'company':
@@ -221,12 +214,10 @@ def delete_invoice(invoice_id):
             db.session.delete(invoice)
             db.session.commit()
             flash('Your invoice has been deleted!', 'success')
-            return redirect(url_for('view_invoices'))
         else:
             flash('You are not the owner!', 'danger')
-            return redirect(url_for('view_invoices'))
-    else:
-        abort(403)
+        return redirect(url_for('view_invoices'))
+    abort(403)
 
 @app.route("/viewinventory")
 @login_required
@@ -237,5 +228,4 @@ def view_inventory(): #separate -- query
     """
     if session['account_type']== 'company':
         return render_template('view_inventory.html', title='View Inventory',userdetail = current_user)
-    else:
-        abort(403)
+    abort(403)

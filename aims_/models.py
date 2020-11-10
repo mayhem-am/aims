@@ -11,11 +11,7 @@ def load_user(user_id):
             return Admin.query.get(int(user_id))
         elif session['account_type'] == 'company':
             return Company.query.get(int(user_id))
-        else:
-            return None
-    else:
-        return None
-
+    return None
 
 class Broker(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,7 +22,7 @@ class Broker(db.Model, UserMixin):
     invoices = db.relationship('Invoice', backref='processor', lazy=True)
 
     def __repr__(self):
-        return f"Broker('{self.username}', '{self.email}', '{self.image_file}')"
+        return f"Broker('{self.username}', '{self.email}')"
 
 class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,7 +32,7 @@ class Admin(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
-        return f"Admin('{self.username}', '{self.email}', '{self.image_file}')"
+        return f"Admin('{self.username}', '{self.email}')"
 
 class Company(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +44,7 @@ class Company(db.Model, UserMixin):
     invoices = db.relationship('Invoice', backref='owner', lazy=True)
 
     def __repr__(self):
-        return f"Company('{self.username}', '{self.email}', '{self.image_file}')" 
+        return f"Company('{self.username}', '{self.email}')" 
 
 class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,8 +55,7 @@ class Invoice(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
 
     def __repr__(self):
-        return f"Invoice('{self.image_file}', Owner '{self.owner_id}',Assigned to '{self.broker_id}',Processed '{self.processed}')" 
-
+        return f"Invoice('{self.image_file}', Coordinate '{self.coors_file}', Owner '{self.owner_id}',Assigned to '{self.broker_id}',Processed '{self.processed}')" 
 
 '''
 PRODUCT -->

@@ -5,7 +5,6 @@ from aims_.models import Broker, Admin,Company
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 
-
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=4, max=20)])
