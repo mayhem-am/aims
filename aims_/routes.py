@@ -3,13 +3,12 @@ import secrets
 #from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, session
 from aims_ import app, db, bcrypt
-from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm
+from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm, AssignCommissionForm
 from aims_.models import Broker, Admin, Company, Invoice
 from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route("/")
 @app.route("/home")
-@login_required
 def home():
     return render_template('home.html')
 
@@ -34,6 +33,27 @@ def account(user_id):
     elif session['account_type'] == 'company':
         user = Company.query.get_or_404(user_id)
     return render_template('account.html', title='Account',userdetail = user)
+
+@app.route("/viewinvoices")
+@login_required
+def view_invoices(): 
+    if session['account_type']== 'company':
+        invoices = Invoice.query.filter_by(owner_id = current_user.id).all()
+        title = 'View Invoices'
+    elif session['account_type']== 'admin':
+        invoices = Invoice.query.filter_by(broker_id = None).all() 
+        title = 'Assign Broker'
+    elif session['account_type']== 'broker':
+        invoices = Broker.query.filter_by(id = current_user.id).first().invoices
+        invoices = list(filter(lambda inv:inv.processed==False,invoices))
+        title = 'Process Invoices'
+    return render_template('view_invoices.html', title=title,userdetail = current_user, image_files=invoices)
+
+@app.route("/viewinvoices/<int:invoice_id>/view")
+@login_required
+def view_invoice_by_id(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -92,15 +112,6 @@ def logout():
 '''
 broker specific routing
 '''
-@app.route("/processinvoices")
-@login_required
-def process_invoices():  #separate -- button
-    if session['account_type']== 'broker':
-        invoices = Broker.query.filter_by(id = current_user.id).first().invoices
-        return render_template('view_invoices.html', title='Process Invoices',image_files=invoices)
-    else:
-        abort(403)
-
 @app.route("/viewinvoices/<int:invoice_id>/process", methods=['GET','POST'])
 @login_required
 def process_invoice(invoice_id): 
@@ -108,37 +119,30 @@ def process_invoice(invoice_id):
     invoice extraction part
     """
     if session['account_type']== 'broker':
+        invoice = Invoice.query.filter_by(id= invoice_id).first()
+        invoice.processed = True
+        db.session.commit()
+        return redirect(url_for('view_invoices'))
         return render_template('process_invoice.html', title='Extract Invoice')
     else:
         abort(403)
 
-
 '''
 admin specific routing
 '''
-
-@app.route("/assignbrokers")
-@login_required
-def assign_brokers():
-    if session['account_type']== 'admin':
-        invoices = Invoice.query.filter_by(broker_id = None).all()
-        return render_template('view_invoices.html', title='View Invoices',image_files=invoices)
-    else:
-        abort(403)
-
 @app.route("/viewinvoices/<int:invoice_id>/assign", methods=['GET','POST'])
 @login_required
 def assign_invoice(invoice_id): 
     if session['account_type']== 'admin':
         form = SelectBrokerForm()
         if request.method == 'POST':
-            invoice = Invoice.query.filter_by(id = invoice_id).first()
-            brokerid = Broker.query.filter_by(username = form.broker.data).first().id
-            invoice.broker_id = brokerid
-            db.session.commit()
-            print(invoice)
-            flash('Your invoice has been assigned to %s'%(form.broker.data), 'success')
-            return redirect(url_for('assign_brokers'))
+            if form.validate_on_submit():
+                invoice = Invoice.query.filter_by(id = invoice_id).first()
+                brokerid = Broker.query.filter_by(username = form.broker.data).first().id
+                invoice.broker_id = brokerid
+                db.session.commit()
+                flash('Your invoice has been assigned to %s'%(form.broker.data), 'success')
+                return redirect(url_for('view_invoices'))
         return render_template('assign_broker.html', title='Assign Broker',form = form)
     else:
         abort(403)
@@ -147,7 +151,27 @@ def assign_invoice(invoice_id):
 @login_required
 def view_companies(): #separate -- query
     if session['account_type']== 'admin':
-        return render_template('view_companies.html', title='View Companies',userdetail = current_user)
+        companies = Company.query.all()
+        return render_template('view_companies.html', title='View Companies',companies = companies)
+    else:
+        abort(403)
+
+
+@app.route("/viewcompanies/<int:company_id>/assigncommission",methods= ['GET','POST'])
+@login_required
+def view_company_by_id(company_id): #separate -- query
+    if session['account_type']== 'admin':
+        company = Company.query.filter_by(id = company_id).first()
+        form = AssignCommissionForm()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                company.commission = form.newcommission.data
+                db.session.commit()
+                flash('%s commission has been changed to %d'%(company.username,form.newcommission.data), 'success')
+                return redirect(url_for('view_companies'))
+        elif request.method == 'GET':
+            form.newcommission.data = company.commission
+        return render_template('assign_commission.html', title='Assign Commission',form = form)
     else:
         abort(403)
 
@@ -188,30 +212,19 @@ def upload_invoice():
     else:
         abort(403)
 
-@app.route("/viewinvoices")
-@login_required
-def view_invoices(): 
-    if session['account_type']== 'company':
-        invoices = Invoice.query.filter_by(owner_id = current_user.id).all()
-        return render_template('view_invoices.html', title='View Invoices',userdetail = current_user, image_files=invoices)
-    else:
-        abort(403)
-
-@app.route("/viewinvoices/<int:invoice_id>/view")
-@login_required
-def view_invoice_by_id(invoice_id):
-    invoice = Invoice.query.get_or_404(invoice_id)
-    return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
-
 @app.route("/viewinvoices/<int:invoice_id>/delete", methods=['POST'])
 @login_required
 def delete_invoice(invoice_id):
-    invoice = Invoice.query.get_or_404(invoice_id)
-    if session['account_type']== 'company' and invoice.owner_id == current_user.id:
-        db.session.delete(invoice)
-        db.session.commit()
-        flash('Your invoice has been deleted!', 'success')
-        return redirect(url_for('view_invoices'))
+    if session['account_type']== 'company':
+        invoice = Invoice.query.get_or_404(invoice_id)
+        if invoice.owner_id == current_user.id:
+            db.session.delete(invoice)
+            db.session.commit()
+            flash('Your invoice has been deleted!', 'success')
+            return redirect(url_for('view_invoices'))
+        else:
+            flash('You are not the owner!', 'danger')
+            return redirect(url_for('view_invoices'))
     else:
         abort(403)
 

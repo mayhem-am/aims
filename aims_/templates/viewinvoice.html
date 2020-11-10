@@ -12,6 +12,18 @@
                 {% else %}
                     <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('process_invoice', invoice_id=invoice.id) }}">Process</a>
                 {% endif %}
+                <div class="col-md-9 mu-3 mb-3"></div>
+                <h5>Status</h5>
+                {% if invoice.broker_id == None %}
+                    <p class="text-danger">Unassigned</p>
+                {% else %}
+                    <p class="text-success">Assigned to Broker {{invoice.broker_id}}</p>
+                {% endif %}
+                {% if invoice.processed == False %}
+                    <p class="text-danger">Not Processed</p>
+                {% else %}
+                    <p class="text-success">Processed</p>
+                {% endif %}
             </div>
         </div>
         <!-- Modal -->

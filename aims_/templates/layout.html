@@ -34,9 +34,9 @@
             {% if current_user.is_authenticated %}
               <!-- Navbar user specific experimentation -->
               {% if session['account_type']=='broker' %}
-                <a class="nav-item nav-link" href="{{ url_for('process_invoices') }}">Process</a>
+                <a class="nav-item nav-link" href="{{ url_for('view_invoices') }}">Process</a>
               {% elif session['account_type']=='admin'%}
-                <a class="nav-item nav-link" href="{{ url_for('assign_brokers') }}">Assign Broker</a>
+                <a class="nav-item nav-link" href="{{ url_for('view_invoices') }}">Assign Broker</a>
                 <a class="nav-item nav-link" href="{{ url_for('view_companies') }}">Companies</a>
               {% elif session['account_type']=='company'%}
                 <a class="nav-item nav-link" href="{{ url_for('upload_invoice') }}">Upload Invoice</a>

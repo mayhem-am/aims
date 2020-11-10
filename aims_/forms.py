@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, IntegerField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 from aims_.models import Broker, Admin,Company
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
@@ -23,15 +23,15 @@ class RegistrationForm(FlaskForm):
         if role == 'broker':
             user = Broker.query.filter_by(username=username.data).first()
             if user:
-                raise ValidationError('That username as User role is taken. Please choose a different one.')
+                raise ValidationError('That username as Broker role is taken. Please choose a different one.')
         elif role == 'admin':
             user = Admin.query.filter_by(username=username.data).first()
             if user:
-                raise ValidationError('That username as Tester role is taken. Please choose a different one.')
+                raise ValidationError('That username as Admin role is taken. Please choose a different one.')
         elif role == 'company':
             user = Company.query.filter_by(username=username.data).first()
             if user:
-                raise ValidationError('That username as Tester role is taken. Please choose a different one.')
+                raise ValidationError('That username as Company role is taken. Please choose a different one.')
         else:
             raise ValidationError('Invalid role entered.')
 
@@ -40,15 +40,15 @@ class RegistrationForm(FlaskForm):
         if role == 'broker':
             user = Broker.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError('That email as User role is taken. Please choose a different one.')
+                raise ValidationError('That email as Broker role is taken. Please choose a different one.')
         elif role == 'admin':
             user = Admin.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError('That email as Tester role is taken. Please choose a different one.')
+                raise ValidationError('That email as Admin role is taken. Please choose a different one.')
         elif role == 'company':
             user = Company.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError('That email as Tester role is taken. Please choose a different one.')
+                raise ValidationError('That email as Company role is taken. Please choose a different one.')
         else:
             raise ValidationError('Invalid role entered.')
 
@@ -58,13 +58,16 @@ class LoginForm(FlaskForm):
     role = SelectField('Role',choices = ['Broker','Admin','Company'])
     submit = SubmitField('Login')
 
-# added form for company to upload invoice and coordinates file
 class UploadInvoiceForm(FlaskForm):
-    invoice_picture = FileField('Upload Invoice', validators=[FileAllowed(['jpg', 'png'])])
-    coords_file = FileField('Upload Coordinates File', validators=[FileAllowed(['csv','xlsx'])])
+    invoice_picture = FileField('Upload Invoice', validators=[DataRequired(),FileAllowed(['jpg', 'png'])])
+    coords_file = FileField('Upload Coordinates File', validators=[DataRequired(),FileAllowed(['csv','xlsx'])])
     submit = SubmitField('Upload')
 
 class SelectBrokerForm(FlaskForm):
     brokers = Broker.query.all()
     broker = SelectField('Broker',choices = [broker.username for broker in brokers])
     submit = SubmitField('Select')
+
+class AssignCommissionForm(FlaskForm):
+    newcommission = IntegerField('Commission',validators = [NumberRange(min=1, max=100, message='\nInput between 1 and 100')])
+    submit = SubmitField('Done')
