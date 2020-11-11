@@ -2,7 +2,7 @@ import os
 import secrets
 #from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, session
-from aims_ import app, db, bcrypt
+from aims_ import app, db, bcrypt, collection
 from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm, AssignCommissionForm
 from aims_.models import Broker, Admin, Company, Invoice
 from flask_login import login_user, current_user, logout_user, login_required
@@ -10,6 +10,9 @@ from flask_login import login_user, current_user, logout_user, login_required
 @app.route("/")
 @app.route("/home")
 def home():
+    results = collection.find({})
+    for x in results:
+        print(x)
     return render_template('home.html')
 
 @app.route("/fellowsdisplay")

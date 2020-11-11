@@ -4,7 +4,8 @@
         <div class="media-body">
                 <h3><a class="article-title">{{ company.username }}</a></h3>
                 <p class="text-secondary">{{ company.email }}</p>
-                <p class="text-shadow">Commission {{ company.commission }}</p>
+                <h6 class="text-primary">Commission {{ company.commission }}</h6>
+                <h5 class="text-shadow">Revenue {{ company.revenue_generated }}</h5>
                 <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('view_company_by_id', company_id=company.id) }}">Update Commission</a>
         </div>    
         <div class="col-md-9 mu-5 mb-5"></div>

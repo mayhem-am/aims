@@ -41,10 +41,11 @@ class Company(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
     commission = db.Column(db.Integer,nullable=False,default = 10)
+    revenue_generated = db.Column(db.Integer,nullable=False,default = 0)
     invoices = db.relationship('Invoice', backref='owner', lazy=True)
 
     def __repr__(self):
-        return f"Company('{self.username}', '{self.email}')" 
+        return f"Company('{self.username}', '{self.email}') Commission '{self.commission}', Revenue '{self.revenue_generated}'" 
 
 class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,6 +65,6 @@ invoice id - fk
 company id - fk
 amount
 name
-id
+id - pk
 quantity
 '''
