@@ -124,6 +124,15 @@ def process_invoice(invoice_id):
     if session['account_type']== 'broker':
         invoice = Invoice.query.filter_by(id= invoice_id).first()
         invoice.processed = True
+        """
+        making calls to the extraction part
+        """
+        image_path = ''
+        excel_path = ''
+        (data, table_data) = predict_invoice(image_path, excel_path)
+        
+        # use data to update database
+        
         db.session.commit()
         return redirect(url_for('view_invoices'))
         return render_template('process_invoice.html', title='Extract Invoice')
