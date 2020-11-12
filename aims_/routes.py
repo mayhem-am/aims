@@ -10,9 +10,11 @@ from flask_login import login_user, current_user, logout_user, login_required
 @app.route("/")
 @app.route("/home")
 def home():
-    results = collection.find({})
-    for x in results:
-        print(x)
+    """
+    Test mongodb connection
+    for x in collection.find({}):
+        print(x) 
+    """
     return render_template('home.html')
 
 @app.route("/fellowsdisplay")
@@ -176,13 +178,13 @@ def view_company_by_id(company_id):
 '''
 company specific routing
 '''
-def save_picture(form_picture,filetype):
+def save_picture(form_picture,directory):
     """
-    helper function to save pictue in static/profile_pics
+    helper function to save pictue in static/<directory>
     """
     f_name, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = f_name + f_ext
-    picture_path = os.path.join(app.root_path, 'static/'+filetype, picture_fn)
+    picture_path = os.path.join(app.root_path, 'static/'+directory, picture_fn)
     form_picture.save(picture_path)
     """
     output_size = (125, 125)

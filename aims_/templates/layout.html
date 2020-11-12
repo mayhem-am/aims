@@ -34,6 +34,7 @@
                 <a class="nav-item nav-link" href="{{ url_for('view_invoices') }}">Assign Broker</a>
                 <a class="nav-item nav-link" href="{{ url_for('view_companies') }}">Companies</a>
               {% elif session['account_type']=='company'%}
+                <a class="nav-item nav-link" href="/annotateinv/">Annotate Invoice</a>
                 <a class="nav-item nav-link" href="{{ url_for('upload_invoice') }}">Upload Invoice</a>
                 <a class="nav-item nav-link" href="{{ url_for('view_invoices') }}">View Invoices</a>
                 <a class="nav-item nav-link" href="{{ url_for('view_inventory') }}">Inventory</a>
