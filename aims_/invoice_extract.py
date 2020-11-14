@@ -44,23 +44,26 @@ def get_annotations_xlsx(path):
 
     #path = './Sample images/Data.csv'
     df = pd.read_excel(path,header=None)
-
+    
     annotate_dict = {}
     number_of_rows = df.shape[0]
-    for r in range(0,number_of_rows):
+    # print(number_of_rows)
+    for r in range(1,number_of_rows):
         row1 = df.iloc[r,:]
+        # print(type(row1))
+        curr_row = row1.tolist()
+        # print(type(curr_row))
+        # print(curr_row)
+        # print(row1['height'].values[0])
+        # print(row1)
         annotate_dict['page '+str(r+1)] = []
-        for i in range(1,len(row1)):
-            if str(row1[i])!='nan':
-                temp_dict = eval(str(row1[i]))
-                label = temp_dict['label']
-                x1 = temp_dict['left']
-                y1 = temp_dict['top']
-                h = temp_dict['height']
-                w = temp_dict['width']
-                x2 = x1+w
-                y2 = y1+h
-                annotate_dict['page '+str(r+1)].append(
+        label = curr_row[4]
+        x1 = int(curr_row[2])
+        x2 = x1 + int(curr_row[0])
+        y1 = int(curr_row[3])
+        y2 = y1 + int(curr_row[1])
+        # print(type(y2), type(label))
+        annotate_dict['page '+str(r+1)].append(
                     {
                         label:(x1,y1,x2,y2)
                     }
