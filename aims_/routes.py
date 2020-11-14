@@ -6,6 +6,7 @@ from aims_ import app, db, bcrypt, collection
 from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm, AssignCommissionForm
 from aims_.models import Broker, Admin, Company, Invoice
 from flask_login import login_user, current_user, logout_user, login_required
+from invoice_extract import predict_invoice
 
 @app.route("/")
 @app.route("/home")
