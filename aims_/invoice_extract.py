@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 from pytesseract import Output
 from table_detect import find_contours
+from text_recog import extract_table_data
 import pandas as pd
 import json,math
 
@@ -105,6 +106,7 @@ def predict_invoice(path,excel_path):
     # for now the text will be in list
     # further change it to json or as required
     data = []
+    columns = 0
     
     
     for k in annotations.keys():
@@ -115,10 +117,21 @@ def predict_invoice(path,excel_path):
                 x1,y1,x2,y2 = annotations_list[i][label]
 
                 sub_image = img[y1:y2,x1:x2]
-
+                
+                if label != "Start of Table" and label!='No of Columns':
+                    temp_dict = {}
+                    text = plot_image(sub_image)
+                    temp_dict[label] = text
+                    data.append(temp_dict)
+                    
+                if label == 'No of Columns':
+                    columns = x1
+                
+                """
                 text = plot_image(sub_image)
                 data.append(text)
-    table_data = find_contours(path)   
+                """
+    table_data = extract_table_data(path, columns)   
 
     return (data,table_data) 
 
