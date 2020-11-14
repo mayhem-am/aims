@@ -82,9 +82,6 @@ def plot_image(img):
         plt.title(text)
     """
 
-    import cv2 as cv
-    import numpy as np
-    from matplotlib import pyplot as plt
 
     text = pytesseract.image_to_string(img)
     """
@@ -99,7 +96,7 @@ def plot_image(img):
 def predict_invoice(path,excel_path):
 
 
-    img = cv.imread(path,0)
+    img = cv2.imread(path,0)
     """
     plt.imshow(img)
     plt.show()
