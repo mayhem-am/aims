@@ -107,6 +107,7 @@ def predict_invoice(path,excel_path):
     # further change it to json or as required
     data = []
     columns = 0
+    table_img = None
     
     
     for k in annotations.keys():
@@ -126,12 +127,18 @@ def predict_invoice(path,excel_path):
                     
                 if label == 'No of Columns':
                     columns = x1
+                    
+                if label == "Start of Table":
+                    table_img = img[y1:, x1:]
+                    # print(y1,y2,x1,x2)    
                 
                 """
                 text = plot_image(sub_image)
                 data.append(text)
                 """
-    table_data = extract_table_data(path, columns)   
+    table_img_path = 'static/invoices/table.jpg'
+    cv2.imwrite(table_img_path, table_img)
+    table_data = extract_table_data(table_img_path,columns)  
 
     return (data,table_data) 
 
