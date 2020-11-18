@@ -63,8 +63,7 @@ class UploadInvoiceForm(FlaskForm):
     submit = SubmitField('Upload')
 
 class SelectBrokerForm(FlaskForm):
-    brokers = Broker.query.all()
-    broker = SelectField('Broker',choices = [broker.username for broker in brokers])
+    broker = SelectField('Broker',choices = [broker.username for broker in Broker.query.all()])
     submit = SubmitField('Select')
 
 class AssignCommissionForm(FlaskForm):
