@@ -58,7 +58,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class UploadInvoiceForm(FlaskForm):
-    invoice_picture = FileField('Upload Invoice', validators=[DataRequired(),FileAllowed(['jpg', 'png'])])
+    invoice_picture = FileField('Upload Invoice', validators=[DataRequired(),FileAllowed(['jpg', 'png','jpeg'])])
     coords_file = FileField('Upload Coordinates File', validators=[DataRequired(),FileAllowed(['csv','xlsx'])])
     submit = SubmitField('Upload')
 

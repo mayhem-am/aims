@@ -6,15 +6,11 @@ from aims_ import app, db, bcrypt, collection
 from aims_.forms import RegistrationForm, LoginForm, UploadInvoiceForm, SelectBrokerForm, AssignCommissionForm
 from aims_.models import Broker, Admin, Company, Invoice
 from flask_login import login_user, current_user, logout_user, login_required
+from aims_.invoice_extract import predict_invoice
 
 @app.route("/")
 @app.route("/home")
 def home():
-    """
-    Test mongodb connection
-    for x in collection.find({}):
-        print(x) 
-    """
     return render_template('home.html')
 
 @app.route("/fellowsdisplay")
@@ -120,15 +116,26 @@ broker specific routing
 @app.route("/viewinvoices/<int:invoice_id>/process", methods=['GET','POST'])
 @login_required
 def process_invoice(invoice_id): 
-    """
-    invoice extraction part
-    """
     if session['account_type']== 'broker':
         invoice = Invoice.query.filter_by(id= invoice_id).first()
+        image_path = os.path.join(app.root_path, 'static/invoices', invoice.image_file)
+        coors_path = os.path.join(app.root_path, 'static/coordinates', invoice.coors_file)
+        data, table_data  = predict_invoice(image_path,coors_path)
+        post_data = {"invoice_id":invoice.id,"owner_id":invoice.owner_id}
+        if len(data)!=0:
+            for field in data:
+                post_data.update(field)
+        if len(table_data)!=0:
+            tabledata = {"Items":table_data}
+        post_data.update(tabledata)
+        collection.insert_one(post_data)
         invoice.processed = True
+        no_table_items = len(data)+len(table_data)
+        owner = invoice.owner
+        owner.revenue_generated+= (owner.commission*no_table_items)
         db.session.commit()
+        flash('Invoice %d by %s has been processed'%(invoice.id,owner.username), 'success')
         return redirect(url_for('view_invoices'))
-        return render_template('process_invoice.html', title='Extract Invoice')
     abort(403)
 
 '''
@@ -216,6 +223,7 @@ def delete_invoice(invoice_id):
     if session['account_type']== 'company':
         invoice = Invoice.query.get_or_404(invoice_id)
         if invoice.owner_id == current_user.id:
+            collection.delete_one({"invoice_id":invoice.id,"owner_id":current_user.id})
             db.session.delete(invoice)
             db.session.commit()
             flash('Your invoice has been deleted!', 'success')
@@ -226,11 +234,16 @@ def delete_invoice(invoice_id):
 
 @app.route("/viewinventory")
 @login_required
-def view_inventory(): #separate -- query
-    """
-    query products belonging to company and id of invoice from where they came from
-    Product.query.filter_by(owner_id = currentuser.id).all()
-    """
+def view_inventory(): 
     if session['account_type']== 'company':
-        return render_template('view_inventory.html', title='View Inventory',userdetail = current_user)
+        items = []
+        for x in collection.find({"owner_id":current_user.id}):
+            checkinvoice = Invoice.query.filter_by(id=x["invoice_id"]).first()
+            if checkinvoice !=None:
+                del x["_id"]
+                del x["owner_id"]
+                items.append(x)
+        if len(items)==0:
+            flash('No invoices uploaded or processed to view inventory!', 'danger')
+        return render_template('view_inventory.html', title='View Inventory',items = items)
     abort(403)
