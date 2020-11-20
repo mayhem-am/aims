@@ -210,10 +210,14 @@ def upload_invoice():
             if form.invoice_picture.data and form.coords_file.data:
                 picture_file = save_picture(form.invoice_picture.data,'invoices')
                 coords_file = save_picture(form.coords_file.data,'coordinates')
-                inv = Invoice(image_file = picture_file,coors_file = coords_file,owner_id = current_user.id)
-                db.session.add(inv)
-                db.session.commit()
-                flash('Your invoice has been uploaded. Go to View invoices to check', 'success')
+                checkinv = Invoice.query.filter_by(image_file = picture_file,coors_file = coords_file).first()
+                if checkinv==None or checkinv.owner_id!=current_user.id:
+                    inv = Invoice(image_file = picture_file,coors_file = coords_file,owner_id = current_user.id)
+                    db.session.add(inv)
+                    db.session.commit()
+                    flash('Your invoice has been uploaded. Go to View invoices to check', 'success')
+                else:
+                    flash('That invoice has already been uploaded. Go to View invoices to check', 'danger')
         return render_template('upload_invoice.html', title='Upload',userdetail = current_user, form=form)
     abort(403)
 
