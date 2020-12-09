@@ -1,8 +1,8 @@
 width,height,left,top,label
-397,41,211,28,Company Name
-292,56,99,122,Company Address
-180,29,99,289,Invoice Number
-532,32,95,343,Start of Table
-82,34,555,469,Tax
-117,52,504,509,Total
+395,49,208,26,Company Name
+285,56,101,125,Company Address
+102,29,183,283,Invoice Number
+544,32,91,343,Start of Table
+83,35,549,472,Tax
+119,74,535,567,Total
 3,3,3,3,No of Columns
