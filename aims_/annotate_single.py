@@ -25,7 +25,7 @@ dashapp = dash.Dash(name='annotateapp', server=app, url_base_pathname='/annotate
 list_columns = ['width', 'height', 'left', 'top', 'label']
 columns = [{'name': i, "id": i} for i in list_columns]
 columns[-1]['presentation'] = 'dropdown'
-list_preferred = ['Company Name','Company Address','Invoice Number','Start of Table','End of Table','Tax','Total']
+list_preferred = ['Company Name','Company Address','Invoice Number','Start of Table','End of Table','Subtotal','Tax','Total']
 shortlists = [{'label': i, 'value': i} for i in list_preferred]
 
 dashapp.layout = html.Div([
@@ -121,7 +121,8 @@ def show_string(json_data,img_content,table_data):
                 stdt = df.to_dict('records')
                 if table_data!=None:
                     for i in range(len(table_data)):
-                        stdt[i]['label'] = table_data[i]['label']
+                        if 'label' in table_data[i]:
+                            stdt[i]['label'] = table_data[i]['label']
                 return stdt
         raise dash.exceptions.PreventUpdate
     else:
