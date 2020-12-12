@@ -5,7 +5,6 @@ import regex as re
 import cv2
 import os
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
 def extract_table_data(image_file, columns):
     large = image_file
     h = large.shape[0]

@@ -47,7 +47,7 @@ dashapp.layout = html.Div([
     ),
     dash_canvas.DashCanvas(
                             id='canvas',
-                            width=500,
+                            width=700,
                             tool='rectangle',
                             lineWidth=2,
                             lineColor='rgba(255,0, 0, 0.5)',
