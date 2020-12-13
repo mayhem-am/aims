@@ -6,18 +6,18 @@
         {{ form.hidden_tag() }}
 
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Join Today</legend>
+            <legend class="border-bottom mb-4">Update Quantity</legend>
             <div class="form-group">
-                {{ form.role.label(class="form-control-label") }}
-                {% if form.role.errors %}
-                {{ form.role(class="form-control form-control-lg is-invalid") }}
+                {{ form.newquantity.label(class="form-control-label") }}
+                {% if form.newquantity.errors %}
+                {{ form.newquantity(class="form-control form-control-lg is-invalid") }}
                 <div class="invalid-feedback">
-                    {% for error in form.role.errors %}
+                    {% for error in form.newquantity.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
                 </div>
                 {% else %}
-                {{ form.role(class="form-control form-control-lg") }}
+                {{ form.newquantity(class="form-control form-control-lg") }}
                 {% endif %}
             </div>
         </fieldset>
@@ -25,10 +25,5 @@
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
     </form>
-</div>
-<div class="border-top pt-auto">
-    <small class="text-muted">
-        Already Have An Account? <a class="ml-2" href="{{ url_for('login') }}">Sign In</a>
-    </small>
 </div>
 {% endblock content %}

@@ -80,9 +80,13 @@ a.article-title:hover {
 
 .view-invoice{
   height: 500px;
-  width: 300px;
+  width: 400px;
 }
 
+.manprocess-invoice{
+  height: 700px;
+  width: 700px;
+}
 .account-heading {
   font-size: 2.5rem;
 }

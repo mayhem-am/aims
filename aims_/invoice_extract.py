@@ -1,19 +1,19 @@
-"""
-contains function to extract text from image
-input : image_file, coordinates file
-output : list of all the text (can be made to JSON as well)
-correctly_working : (jpeg)invoice4,invoice6,invoice7,
-(jpg) : invoice14,
-"""
 import cv2
 import matplotlib.pyplot as plt
 import pytesseract
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 from pytesseract import Output
-from aims_.new_text_recog import extract_table_data
+from aims_.table_recog_ocrapi import table_data_extract, itemparser
+import pandas as pd
+import io,requests
 import pandas as pd
 import json,math
+
+fields = 0
+totalconf = 0
+
+ocrspace_url_api = "https://api.ocr.space/parse/image"
 
 def get_annotations_xlsx(path):
     df = pd.read_csv(path,header=None)
@@ -36,10 +36,26 @@ def get_annotations_xlsx(path):
     return annotate_dict
 
 def plot_image(img):
-    text = pytesseract.image_to_string(img)
-    return text
+    global fields
+    global totalconf
+    fields += 1
+    acttext = pytesseract.image_to_string(img)
+    text = pytesseract.image_to_data(img, output_type=Output.DICT)
+    conf = 0
+    validfields = 0
+    extrvals = text['text']
+    confvals = text['conf']
+    for i in range(len(extrvals)):
+        if extrvals[i] != '':
+            conf += confvals[i]
+            validfields += 1
+    if validfields != 0:
+        conf = conf//validfields
+    totalconf += conf
+    return acttext
 
 def predict_invoice(path,excel_path):
+    global totalconf
     img = cv2.imread(path,0)
     annotations = get_annotations_xlsx(excel_path)
     # for now the text will be in list
@@ -74,8 +90,12 @@ def predict_invoice(path,excel_path):
                     ts_first = y1
                     ts_second = x1
 
-                # if label == "End of Table":
-                #     table_img = img[ts_first:y2,ts_second:x2]
-                #     # print(ts_first,y2,ts_second,x2)
-    table_data = extract_table_data(table_img,columns)  
-    return (data,table_data) 
+                if label == "End of Table":
+                    table_img2 = img[ts_first:y2, ts_second:x2]
+                    table_img = np.stack((table_img2,)*3, axis=-1)
+                    # print(ts_first,y2,ts_second,x2)
+    table_data = table_data_extract(table_img, columns)  # ocr-api
+    if len(data)!=0:
+        totalconf = totalconf//len(data)
+    getproducts = itemparser(table_data,columns)
+    return (data,getproducts,totalconf) 

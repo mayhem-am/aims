@@ -19,10 +19,14 @@ class Broker(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
-    invoices = db.relationship('Invoice', backref='processor', lazy=True)
+    sex = db.Column(db.String(20), nullable=False)
+    street = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
 
+    invoices = db.relationship('Invoice', backref='processor', lazy=True)
+    
     def __repr__(self):
-        return f"Broker('{self.username}', '{self.email}')"
+        return f"Broker('{self.username}', '{self.email}', '{self.sex}')"
 
 class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,9 +34,12 @@ class Admin(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
+    sex = db.Column(db.String(20), nullable=False)
+    street = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
-        return f"Admin('{self.username}', '{self.email}')"
+        return f"Admin('{self.username}', '{self.email}', '{self.sex}')"
 
 class Company(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,29 +49,54 @@ class Company(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     commission = db.Column(db.Integer,nullable=False,default = 10)
     revenue_generated = db.Column(db.Integer,nullable=False,default = 0)
-    invoices = db.relationship('Invoice', backref='owner', lazy=True)
+    street = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+
+    invoices = db.relationship(
+        'Invoice', backref='owner', cascade="all,delete", lazy=True)
+    specializations = db.relationship('Specialization', backref='owners',cascade="all,delete", lazy=True)
+    products = db.relationship(
+        'Inventory', backref='product_owner', cascade="all,delete", lazy=True)
 
     def __repr__(self):
-        return f"Company('{self.username}', '{self.email}') Commission '{self.commission}', Revenue '{self.revenue_generated}'" 
+        return f"Company('{self.name}', '{self.email}') Commission '{self.commission}', Revenue '{self.revenue_generated}'" 
 
 class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image_file =  db.Column(db.String(20), nullable=False)
     coors_file =  db.Column(db.String(20), nullable=False)
     processed = db.Column(db.Boolean, nullable=False,default= False)
+    manual_processing = db.Column(db.Boolean, nullable=False, default=False)
     broker_id = db.Column(db.Integer, db.ForeignKey('broker.id'),nullable = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
 
     def __repr__(self):
         return f"Invoice('{self.image_file}', Coordinate '{self.coors_file}', Owner '{self.owner_id}',Assigned to '{self.broker_id}',Processed '{self.processed}')" 
 
-'''
-PRODUCT -->
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    price = db.Column(db.Integer,nullable=False)
 
-invoice id - fk
-company id - fk
-amount
-name
-id - pk
-quantity
-'''
+    products = db.relationship(
+        'Inventory', backref='which_product', cascade="all,delete", lazy=True)
+
+    def __repr__(self):
+        return f"Product('{self.name}', '{self.price}')"
+
+class Specialization(db.Model):
+    name = db.Column(db.String(20), nullable=False, primary_key=True,autoincrement=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False,primary_key=True, autoincrement=False)
+
+    def __repr__(self):
+        return f"Specialization('{self.name}', '{self.company_id}')"
+
+class Inventory(db.Model):
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False,primary_key=True,autoincrement=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, primary_key=True, autoincrement=False)
+    quantity = db.Column(db.Integer, nullable=False,default=0)
+    
+    def __repr__(self):
+        return f"Inventory(Company :'{self.company_id}', Product Number : '{self.product_id}', Quantity : '{self.quantity}')"
+
+

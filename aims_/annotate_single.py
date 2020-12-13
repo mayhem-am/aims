@@ -25,7 +25,7 @@ dashapp = dash.Dash(name='annotateapp', server=app, url_base_pathname='/annotate
 list_columns = ['width', 'height', 'left', 'top', 'label']
 columns = [{'name': i, "id": i} for i in list_columns]
 columns[-1]['presentation'] = 'dropdown'
-list_preferred = ['Company Name','Company Address','Invoice Number','Start of Table','End of Table','Subtotal','Tax','Total']
+list_preferred = ['Company Name','Company Address','Invoice Number','Start of Table','End of Table','Subtotal','Tax','Discount','Total']
 shortlists = [{'label': i, 'value': i} for i in list_preferred]
 
 dashapp.layout = html.Div([
@@ -47,7 +47,7 @@ dashapp.layout = html.Div([
     ),
     dash_canvas.DashCanvas(
                             id='canvas',
-                            width=700,
+                            width=1000,
                             tool='rectangle',
                             lineWidth=2,
                             lineColor='rgba(255,0, 0, 0.5)',
