@@ -174,27 +174,30 @@ def process_invoice(invoice_id):
         image_path = os.path.join(app.root_path, 'static/invoices', invoice.image_file)
         coors_path = os.path.join(app.root_path, 'static/coordinates', invoice.coors_file)
         data, table_data,confidence  = predict_invoice(image_path,coors_path) #extract fields
-        update_products(table_data,invoice.owner_id,invoice.id)      #update product database
-        if confidence>100:
-            confidence=100
-        post_data = {"invoice_id":invoice.id,"owner_id":invoice.owner_id,"Accuracy":confidence}
-        if len(data)!=0:
-            for field in data:
-                post_data.update(field)
-        tabledata = {}
-        if len(table_data) != 0:
-            ll = []
-            for ele in table_data:
-                ll.append([ele[0],ele[2]])
-            tabledata = {"Items": ll}
-        post_data.update(tabledata)
-        collection.insert_one(post_data)
-        invoice.processed = True
-        no_table_items = len(data)+len(table_data)
-        owner = invoice.owner
-        owner.revenue_generated+= (owner.commission*no_table_items)
-        db.session.commit()
-        flash('Invoice %d by %s has been processed'%(invoice.id,owner.username), 'success')
+        if data==None and table_data==None and confidence==None:
+            flash('Invoice could not be processed now. Check your internet connection', 'danger')
+        else:
+            update_products(table_data,invoice.owner_id,invoice.id)      #update product database
+            if confidence>100:
+                confidence=100
+            post_data = {"invoice_id":invoice.id,"owner_id":invoice.owner_id,"Accuracy":confidence}
+            if len(data)!=0:
+                for field in data:
+                    post_data.update(field)
+            tabledata = {}
+            if len(table_data) != 0:
+                ll = []
+                for ele in table_data:
+                    ll.append([ele[0],ele[2]])
+                tabledata = {"Items": ll}
+            post_data.update(tabledata)
+            collection.insert_one(post_data)
+            invoice.processed = True
+            no_table_items = len(data)+len(table_data)
+            owner = invoice.owner
+            owner.revenue_generated+= (owner.commission*no_table_items)
+            db.session.commit()
+            flash('Invoice %d by %s has been processed'%(invoice.id,owner.username), 'success')
         return redirect(url_for('view_invoices'))
     abort(403)
 
@@ -465,12 +468,9 @@ def update_product_quant(product_id):
 @login_required
 def delete_product_quant(product_id):
     if session['account_type'] == 'company':
-        print(product_id)
         company = Company.query.filter_by(id=current_user.id).first()
         invitem = Inventory.query.filter_by(company_id=company.id, product_id=product_id).first()
         actprod = Product.query.filter_by(id=product_id).first()
-        #invitem = Inventory.query.get_or_404(company_id=company.id,product_id=product_id)
-        print(invitem)
         db.session.delete(invitem)
         db.session.commit()
         flash('Product %s has been removed!' %

@@ -95,6 +95,8 @@ def predict_invoice(path,excel_path):
                     table_img = np.stack((table_img2,)*3, axis=-1)
                     # print(ts_first,y2,ts_second,x2)
     table_data = table_data_extract(table_img, columns)  # ocr-api
+    if table_data==None:
+        return None,None,None
     if len(data)!=0:
         totalconf = totalconf//len(data)
     getproducts = itemparser(table_data,columns)

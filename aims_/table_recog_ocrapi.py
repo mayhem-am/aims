@@ -10,16 +10,17 @@ def table_data_extract(image_file,actcolumns):
     file_bytes = io.BytesIO(compressedimage)
     try:
         result = requests.post(url_api,
-                           files={"screenshot.jpg": file_bytes},
-                           data={"apikey": "8b2b1e3c0e88957",
-                                 "language": "eng", "isOverlayRequired": True, "detectOrientation": False, 'isTable': True, "scale": True})
+                        files={"screenshot.jpg": file_bytes},
+                               data={"apikey": "ecb470d5e888957",  "language": "eng", "isOverlayRequired": True, "detectOrientation": False, 'isTable': True, "scale": True})  # get your api key at https://ocr.space/OCRAPI
     except Exception as e:
-        print("Check Internet Connection")
-        exit()
+        return None
     result = result.content.decode()
     result = json.loads(result)
+    print(result)
     allitems = []
     if result != None and "ParsedResults" in result:
+        if len(result.get("ParsedResults"))==0:
+            return None
         parsed_results = result.get("ParsedResults")[0]
         text_detected = parsed_results.get("ParsedText")
         table_items = text_detected.strip().split('\n')
