@@ -207,11 +207,13 @@ def process_invoice(invoice_id):
 def processman(invoice_id):
     if session['account_type'] == 'broker':
         items = []
-        for x in collection.find({"invoice_id":invoice_id}):
+        x = collection.find_one({"invoice_id":invoice_id})
+        if x!=None:
             checkinvoice = Invoice.query.filter_by(id=x["invoice_id"]).first()
             if checkinvoice !=None:
                 post_data = {"invoice_id": x["invoice_id"], "owner_id": x["owner_id"], "Accuracy": 100}
-                tabledata = {"Items":x["Items"]}
+                if "Items" in x:tabledata = {"Items":x["Items"]}
+                else:tabledata=None
                 form = ManualProcessForm()
                 if request.method == 'POST':
                     if form.validate_on_submit():
@@ -230,7 +232,7 @@ def processman(invoice_id):
                         if "Total" in x:
                             post_data["Total"] = form.total.data
                         collection.delete_one({"invoice_id": invoice_id})
-                        post_data.update(tabledata)
+                        if tabledata!=None:post_data.update(tabledata)
                         collection.insert_one(post_data)
                         checkinvoice.manual_processing = False
                         db.session.commit()
@@ -251,7 +253,14 @@ def processman(invoice_id):
                         form.subt.data = x["Subtotal"]
                     if "Total" in x:
                         form.total.data = x["Total"]
-        return render_template('manual_process.html', title='Manual Process', actlabels=x, form=form, invoice=checkinvoice)
+                return render_template('manual_process.html', title='Manual Process', actlabels=x, form=form, invoice=checkinvoice)
+            else:
+                flash('Invoice %d does not exist anymore!' % (checkinvoice.id), 'danger')
+                return redirect(url_for('view_invoices'))
+        else:
+            flash('Invoice %d has not been processed or fields have been deleted from database!' %(invoice_id), 'danger')
+            return redirect(url_for('view_invoices'))
+        
     abort(403)
 
 '''
@@ -417,6 +426,7 @@ def view_fields():
             if checkinvoice !=None:
                 del x["_id"]
                 del x["owner_id"]
+                x["invoice"]=checkinvoice
                 items.append(x)                
         if len(items)==0:
             flash('No invoices uploaded or processed to view details!', 'danger')

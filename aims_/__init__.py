@@ -10,7 +10,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['MONGO_URI'] = 'mongodb+srv://admin:1234@cluster0.zpmg5.mongodb.net/test?retryWrites=true&w=majority' 
 """
 mongodb+srv://admin:1234@cluster0.djdta.mongodb.net/ <dbname> ?retryWrites=true&w=majority      #akanksham.cs18@rvce.edu.in  <available database : mongodb>
-mongodb+srv://admin:1234@cluster0.zpmg5.mongodb.net/  <dbname>  ?retryWrites=true&w=majority    #amakanksh@gmail.com <available database : test>
+mongodb+srv://admin:1234@cluster0.zpmg5.mongodb.net/  <dbname>  ?retryWrites=true&w=majority    #amakanksh@gmail.com <available databases : test>
 <dbname> == database leading to collection u want to use
 """
 db = SQLAlchemy(app)

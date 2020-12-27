@@ -3,7 +3,8 @@ import os
 import io
 import requests
 import json
-url_api = "https://api.ocr.space/parse/image"
+url_api = "https://api.ocr.space/parse/image" 
+# keys : 085b54acf688957 , ecb470d5e888957
 
 def table_data_extract(image_file,actcolumns):
     _, compressedimage = cv2.imencode(".jpg", image_file)
@@ -11,7 +12,7 @@ def table_data_extract(image_file,actcolumns):
     try:
         result = requests.post(url_api,
                         files={"screenshot.jpg": file_bytes},
-                               data={"apikey": "ecb470d5e888957",  "language": "eng", "isOverlayRequired": True, "detectOrientation": False, 'isTable': True, "scale": True})  # get your api key at https://ocr.space/OCRAPI
+                               data={"apikey": "085b54acf688957",  "language": "eng", "isOverlayRequired": False, "detectOrientation": False, 'isTable': True, "scale": True})  # get your api key at https://ocr.space/OCRAPI
     except Exception as e:
         return None
     result = result.content.decode()
