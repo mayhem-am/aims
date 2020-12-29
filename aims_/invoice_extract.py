@@ -65,6 +65,7 @@ def predict_invoice(path,excel_path):
     table_img = None
     ts_first = None
     ts_second = None    
+    table_data_exists = False
     for k in annotations.keys():
         annotations_list = annotations[k]
         for i in range(len(annotations_list)):
@@ -85,6 +86,7 @@ def predict_invoice(path,excel_path):
                     columns = x1
                     
                 if label == "Start of Table":
+                    table_data_exists = True
                     table_img1 = img[y1:, x1:]
                     table_img = np.stack((table_img1,)*3, axis=-1)
                     ts_first = y1
@@ -94,10 +96,12 @@ def predict_invoice(path,excel_path):
                     table_img2 = img[ts_first:y2, ts_second:x2]
                     table_img = np.stack((table_img2,)*3, axis=-1)
                     # print(ts_first,y2,ts_second,x2)
-    table_data = table_data_extract(table_img, columns)  # ocr-api
-    if table_data==None:
-        return None,None,None
+    if table_data_exists:
+        table_data = table_data_extract(table_img, columns)  # ocr-api
+        getproducts = itemparser(table_data, columns)
+    else:
+        table_data=None
+        getproducts = None
     if len(data)!=0:
         totalconf = totalconf//len(data)
-    getproducts = itemparser(table_data,columns)
     return (data,getproducts,totalconf) 

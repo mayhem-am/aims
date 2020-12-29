@@ -177,6 +177,8 @@ def process_invoice(invoice_id):
         if data==None and table_data==None and confidence==None:
             flash('Invoice could not be processed now. Check your internet connection', 'danger')
         else:
+            if table_data==None:
+                table_data=[]
             update_products(table_data,invoice.owner_id,invoice.id)      #update product database
             if confidence>100:
                 confidence=100
@@ -406,12 +408,14 @@ def delete_invoice(invoice_id):
 def manually_process(invoice_id):
     if session['account_type'] == 'company':
         invoice = Invoice.query.get_or_404(invoice_id)
-        if invoice.owner_id == current_user.id:
+        if invoice.owner_id == current_user.id and invoice.manual_processing==False:
             invoice.manual_processing = True
             db.session.commit()
             flash('Invoice %d has been submitted for manual process!'%(invoice.id), 'success')
+        elif invoice.manual_processing==True:
+            flash('Invoice %d had already been submitted for manual process!' %(invoice.id), 'danger')
         else:
-            flash('You are not the owner!', 'danger')
+            flash('No such invoice has been uploaded!', 'danger')
         return redirect(url_for('view_invoices'))
     abort(403)
 
