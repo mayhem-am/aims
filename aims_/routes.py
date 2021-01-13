@@ -1,5 +1,6 @@
-import os
+import os,json
 import secrets
+from flask_paginate import Pagination, get_page_parameter, get_page_args
 #from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, session
 from aims_ import app, db, bcrypt, collection
@@ -28,33 +29,52 @@ def fellowdisp():
 @app.route("/account/<int:user_id>/view")
 @login_required
 def account(user_id):
+    specializations = []
     if session['account_type'] == 'broker':
         user = Broker.query.get_or_404(user_id)
     elif session['account_type'] == 'admin':
         user = Admin.query.get_or_404(user_id)
     elif session['account_type'] == 'company':
         user = Company.query.get_or_404(user_id)
-    return render_template('account.html', title='Account',userdetail = user)
+        for item in user.specializations:
+            specializations.append(item.name)
+    return render_template('account.html', title='Account',userdetail = user,specs = specializations)
 
-@app.route("/viewinvoices")
+
+@app.route("/viewinvoices", methods=['GET'])
 @login_required
 def view_invoices(): 
-    if session['account_type']== 'company':
-        invoices = Invoice.query.filter_by(owner_id = current_user.id).all()
+    try:
+        page = int(request.args.get('page', 1))
+    except ValueError:
+        page = 1
+    if session['account_type'] == 'company':
+        invoices = Invoice.query.filter_by(owner_id=current_user.id).all()
         title = 'View Invoices'
-    elif session['account_type']== 'admin':
-        invoices = Invoice.query.filter_by(broker_id = None).all() 
+    elif session['account_type'] == 'admin':
+        invoices = Invoice.query.filter_by(broker_id=None).all()
         title = 'Assign Broker'
-    elif session['account_type']== 'broker':
-        invoices = Broker.query.filter_by(id = current_user.id).first().invoices
-        invoices = list(filter(lambda inv:inv.processed==False or (inv.processed==True and inv.manual_processing==True),invoices))
+    elif session['account_type'] == 'broker':
+        invoices = Broker.query.filter_by(id=current_user.id).first().invoices
+        invoices = list(filter(lambda inv: inv.processed == False or (
+            inv.processed == True and inv.manual_processing == True), invoices))
         title = 'Process Invoices'
-    return render_template('view_invoices.html', title=title,userdetail = current_user, image_files=invoices)
+    if len(invoices)==0:
+        flash('No new uploaded invoices!', 'danger')
+        return redirect(url_for('home'))
+    else:
+        i = (page-1)*2
+        li_items = invoices[i:i+2]
+        pagination = Pagination(page=page, per_page=2, total=len(invoices), record_name='items', css_framework='bootstrap4')
+    return render_template('view_invoices.html', title=title, userdetail=current_user, image_files=li_items,pagination=pagination)
 
 @app.route("/viewinvoices/<int:invoice_id>/view")
 @login_required
 def view_invoice_by_id(invoice_id):
     invoice = Invoice.query.get_or_404(invoice_id)
+    if  session['account_type']== 'company' and invoice.owner_id != current_user.id:
+        flash('You are not the owner!', 'danger')
+        return redirect(url_for('view_invoices'))
     return render_template('viewinvoice.html', title='View Invoice',invoice = invoice)
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -273,6 +293,7 @@ admin specific routing
 def assign_invoice(invoice_id): 
     if session['account_type']== 'admin':
         form = SelectBrokerForm()
+        form.broker.choices = [x.username for x in Broker.query.all()]
         if request.method == 'POST':
             if form.validate_on_submit():
                 invoice = Invoice.query.filter_by(id = invoice_id).first()
@@ -294,6 +315,23 @@ def view_companies():
         companies = Company.query.all()
         return render_template('view_companies.html', title='View Companies',companies = companies)
     abort(403)
+
+@app.route("/viewreport")
+@login_required
+def view_report():
+    if session['account_type']== 'admin':
+        comp_names = json.dumps([comp.username for comp in Company.query.all()])
+        revenues = json.dumps([comp.revenue_generated for comp in Company.query.all()])
+        invdata = json.dumps([len(Invoice.query.filter_by(processed=False).all()),len(Invoice.query.filter_by(processed=True,manual_processing=False).all()),len(Invoice.query.filter_by(manual_processing=True).all())])
+        brokers = [bro.username for bro in Broker.query.all()]
+        temp = []
+        for eachbro in brokers:
+            temp.append(len(Broker.query.filter_by(username=eachbro).first().invoices))
+        assgn_invs = json.dumps(temp)
+        bro_names = json.dumps(brokers)
+        return render_template('view_report.html', title='Report', comp_names=comp_names, revenues=revenues,invdata=invdata,bronames= bro_names,assgn_invs=assgn_invs)
+    abort(403)
+
 
 @app.route("/viewcompanies/<int:company_id>/assigncommission",methods= ['GET','POST'])
 @login_required
@@ -420,10 +458,15 @@ def manually_process(invoice_id):
     abort(403)
 
 
-@app.route("/viewfields")
+@app.route("/viewfields",methods=['GET'])
 @login_required
 def view_fields(): 
     if session['account_type']== 'company':
+        try:
+            page = int(request.args.get('page', 1))
+        except ValueError:
+            page = 1
+        #page = request.args.get(get_page_parameter(), type=int, default=1)
         items = []
         for x in collection.find({"owner_id":current_user.id}):
             checkinvoice = Invoice.query.filter_by(id=x["invoice_id"]).first()
@@ -435,13 +478,22 @@ def view_fields():
         if len(items)==0:
             flash('No invoices uploaded or processed to view details!', 'danger')
             return redirect(url_for('view_invoices'))
-        return render_template('view_fields.html', title='View Details',items = items)
+        else:
+            i = (page-1)*3
+            li_items = items[i:i+3]
+            pagination = Pagination(page=page, per_page=3, total=len(
+                items), record_name='items', css_framework='bootstrap4')
+        return render_template('view_fields.html', title='View Details',items = li_items,pagination=pagination)
     abort(403)
 
-@app.route("/viewinventory")
+@app.route("/viewinventory",methods = ['GET'])
 @login_required
 def view_inventory(): 
     if session['account_type']== 'company':
+        try:
+            page = int(request.args.get('page', 1))
+        except ValueError:
+            page = 1
         comp = Company.query.filter_by(id=current_user.id).first()
         prods = comp.products
         tp = []
@@ -451,7 +503,11 @@ def view_inventory():
         if len(tp) == 0:
             flash('No invoices uploaded or processed to view inventory!', 'danger')
             return redirect(url_for('view_invoices'))
-        return render_template('view_inventory.html', title='View Inventory',products=tp)
+        else:
+            i = (page-1)*4
+            li_items = tp[i:i+4]
+            pagination = Pagination(page=page, per_page=4, total=len(tp), record_name='tp', css_framework='bootstrap4')
+        return render_template('view_inventory.html', title='View Inventory',products=li_items,pagination=pagination)
     abort(403)
 
 '''

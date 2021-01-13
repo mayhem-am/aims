@@ -2,9 +2,14 @@
 {% block content %}
     <div class="content-section">
         <div class="media">
-            <img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
+            {% if invoice.processed==True %}
+                <img class="view-invoice" src="{{ url_for('static', filename='bounding_boxes/' + invoice.image_file) }}">
+            {%else%}
+                <img class="view-invoice" src="{{ url_for('static', filename='invoices/' + invoice.image_file) }}">
+            {% endif %}
             <div class = "invoice-body">
                 <h4>Invoice {{ invoice.id }}</h4>
+                <p class="text-secondary">{{invoice.image_file}}</p>
                 <h5>Status</h5>
                 <p class="text-shadow">Added by {{invoice.owner.username}}</p>
                 {% if invoice.broker_id == None %}

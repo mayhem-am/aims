@@ -1,4 +1,4 @@
-import cv2
+import cv2,os
 import matplotlib.pyplot as plt
 import pytesseract
 import numpy as np
@@ -9,6 +9,7 @@ import pandas as pd
 import io,requests
 import pandas as pd
 import json,math
+from aims_ import app
 
 fields = 0
 totalconf = 0
@@ -39,8 +40,11 @@ def plot_image(img):
     global fields
     global totalconf
     fields += 1
-    acttext = pytesseract.image_to_string(img)
-    text = pytesseract.image_to_data(img, output_type=Output.DICT)
+    try:
+        acttext = pytesseract.image_to_string(img)
+        text = pytesseract.image_to_data(img, output_type=Output.DICT)
+    except Exception as e:
+        return ""
     conf = 0
     validfields = 0
     extrvals = text['text']
@@ -57,6 +61,7 @@ def plot_image(img):
 def predict_invoice(path,excel_path):
     global totalconf
     img = cv2.imread(path,0)
+    bboximg = np.copy(img)
     annotations = get_annotations_xlsx(excel_path)
     # for now the text will be in list
     # further change it to json or as required
@@ -74,7 +79,7 @@ def predict_invoice(path,excel_path):
                 x1,y1,x2,y2 = annotations_list[i][label]
 
                 sub_image = img[y1:y2,x1:x2]
-                
+                cv2.rectangle(bboximg, (x1-1, y1-1),(x2+1, y2+1), (0, 0, 255), 2)
                 if label != "Start of Table" and label!='No of Columns' and label!='End of Table':
                     temp_dict = {}
                     text = plot_image(sub_image)
@@ -96,6 +101,11 @@ def predict_invoice(path,excel_path):
                     table_img2 = img[ts_first:y2, ts_second:x2]
                     table_img = np.stack((table_img2,)*3, axis=-1)
                     # print(ts_first,y2,ts_second,x2)
+    picture_fn = path.strip().split('\\')[-1]
+    picture_path = os.path.join(app.root_path, 'static/bounding_boxes')
+    if os.path.exists(os.path.join(picture_path, picture_fn)):
+        os.remove(os.path.join(picture_path, picture_fn))
+    cv2.imwrite(os.path.join(picture_path, picture_fn), bboximg)
     if table_data_exists:
         table_data = table_data_extract(table_img, columns)  # ocr-api
         getproducts = itemparser(table_data, columns)

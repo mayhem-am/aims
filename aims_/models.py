@@ -59,7 +59,7 @@ class Company(db.Model, UserMixin):
         'Inventory', backref='product_owner', cascade="all,delete", lazy=True)
 
     def __repr__(self):
-        return f"Company('{self.name}', '{self.email}') Commission '{self.commission}', Revenue '{self.revenue_generated}'" 
+        return f"Company('{self.username}', '{self.email}') Commission '{self.commission}', Revenue '{self.revenue_generated}'" 
 
 class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)

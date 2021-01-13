@@ -17,7 +17,6 @@ def table_data_extract(image_file,actcolumns):
         return None
     result = result.content.decode()
     result = json.loads(result)
-    print(result)
     allitems = []
     if result != None and "ParsedResults" in result:
         if len(result.get("ParsedResults"))==0:
@@ -44,6 +43,7 @@ def itemparser(allitems,num_columns):
         try:
             x = item[1]
             x = x.replace('$','')
+            x = x.replace(',', '')
             x = x.split('.')[0]
             x=  int(x)
         except Exception as e:
@@ -57,6 +57,7 @@ def itemparser(allitems,num_columns):
         try:
             x = item[3]
             x = x.replace('$', '')
+            x = x.replace(',', '')
             x = x.split('.')[0]
             x = int(x)
         except Exception as e:
