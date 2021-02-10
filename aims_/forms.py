@@ -4,6 +4,11 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from aims_.models import Broker, Admin,Company
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
+import re
+
+def isValidNumber(s):
+    Pattern = re.compile("(91)[0-9]{8}") 
+    return Pattern.match(s)
 
 class RoleForm(FlaskForm):
     role = SelectField('Role', choices=['Broker', 'Admin', 'Company'])
@@ -53,7 +58,7 @@ class RegistrationUserForm(FlaskForm):
             raise ValidationError('Invalid role entered.')
     
     def validate_phone(self,phone):
-        if len(phone.data) < 10 or len(phone.data) > 10:
+        if len(phone.data) < 10 or len(phone.data) > 10 or not isValidNumber(phone.data):
             raise ValidationError(
                 'Please specify valid phone number.')
 
@@ -90,7 +95,7 @@ class RegistrationCompanyForm(FlaskForm):
             raise ValidationError('That email as Company role is taken. Please choose a different one.')
     
     def validate_phone(self, phone):
-        if len(phone.data) < 10 or len(phone.data) > 10:
+        if len(phone.data) < 10 or len(phone.data) > 10 or not isValidNumber(phone.data):
             raise ValidationError(
                 'Please specify valid phone number.')
 
