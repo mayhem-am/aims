@@ -7,7 +7,7 @@ from flask_login import current_user
 import re
 
 def isValidNumber(s):
-    Pattern = re.compile("(91)[0-9]{8}") 
+    Pattern = re.compile("(9)[0-9]{9}") 
     return Pattern.match(s)
 
 class RoleForm(FlaskForm):
